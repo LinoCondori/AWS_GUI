@@ -287,10 +287,13 @@ def axRad(ax, data):
     data10min = data.resample('30T', label='right').mean()
     data10min['DateTime'] = data10min.index
     plot_data_00 = ax.plot(data.DateTime, data.RadWm2, alpha=1)
-    #plot_data_00 = ax.fill_between(data.DateTime, 0, data.RadWm2, alpha=0.6)
+    plot_data_01 = ax.plot(data.DateTime, data.solar_rad_inst, alpha=1, color='tab:orange')
     plot_data_02 = ax.plot(data10min.DateTime, data10min.RadWm2, alpha=1, color='blue', linewidth=3)
-    Pres_patch = mpatches.Patch(color='blue', label='Radiacion Wm2')
-    ax.legend(handles=[Pres_patch])
+    plot_data_03 = ax.plot(data10min.DateTime, data10min.solar_rad_inst, alpha=1, color='orange', linewidth=3)
+
+    Rad_patch = mpatches.Patch(color='blue', label='Radiacion Wm2')
+    Rad_patch_2 = mpatches.Patch(color='orange', label='Radiacion Wm2')
+    ax.legend(handles=[Rad_patch, Rad_patch_2])
     ax.axes.set_ylim(ax.axes.viewLim.ymin - 10, ax.axes.viewLim.ymax + 10)
     limHoraFinal = pd.Timestamp('today').round('min')
 
@@ -305,7 +308,7 @@ def axRad(ax, data):
     ax.xaxis.set_major_formatter(date_form)
     ax.tick_params(direction='in', labelsize=6, length=20)
     ax.tick_params('x', labelrotation=45)
-    return [plot_data_00, plot_data_02]
+    return [plot_data_00, plot_data_01, plot_data_02, plot_data_03]
 
 def axPres(ax, data):
     data10min = data.resample('30T', label='right').mean()

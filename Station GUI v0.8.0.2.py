@@ -466,12 +466,13 @@ class VentanaPrincipal ( wx.Frame ):
 
         # Radiacion
         self.ActualizarEjeX(self.axes_Rad)
-        self.ActualizarEjeY(self.axes_Rad, self.data.RadWm2)
-        self.plot_Rad[0][0].set_xdata(list(self.data.DateTime))
-        self.plot_Rad[0][0].set_ydata(list(self.data.RadWm2))
+        self.ActualizarEjeY(self.axes_Rad, self.data.solar_rad_inst)
 
-        self.plot_Rad[1][0].set_xdata(list(dataTmin.DateTime))
-        self.plot_Rad[1][0].set_ydata(list(dataTmin.RadWm2))
+        self.ActualizarPlot(self.plot_Rad[0][0], self.data, 'RadWm2')
+        self.ActualizarPlot(self.plot_Rad[1][0], self.data, 'solar_rad_inst')
+
+        self.ActualizarPlot(self.plot_Rad[2][0], dataTmin, 'RadWm2')
+        self.ActualizarPlot(self.plot_Rad[3][0], dataTmin, 'solar_rad_inst')
 
         self.canvas.draw()
 
