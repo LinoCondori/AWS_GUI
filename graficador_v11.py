@@ -213,7 +213,7 @@ def axVRap(ax, data):
     data10min['DateTime'] = data10min.index
 
     plot_data_00 = ax.plot(data.DateTime, data.ViMS, alpha=1, color='tab:blue')
-    plot_data_01 = ax.plot(data.DateTime, data.ws_inst_spd, marker='.', alpha=.5, color='tab:orange', markersize=1)
+    plot_data_01 = ax.plot(data.DateTime, data.ws_inst_spd, alpha=.5, color='tab:orange',)
     plot_data_02 = ax.plot(data10min.DateTime, data10min.ViMS, alpha=1, color='blue', linewidth=2)
     plot_data_03 = ax.plot(data10min.DateTime, data10min.ws_inst_spd, alpha=1, color='orange', linewidth=2)
     Rap_patch = mpatches.Patch(color='blue', label='Intensidad Siap')
