@@ -166,9 +166,9 @@ def grafTempSNS(datos):
 def axHR(ax, data):
     data10min = data.resample('30T', label='right').mean()
     data10min['DateTime'] = data10min.index
-    plot_data_00 = ax.plot(data.DateTime, data.HR, alpha=1, color='tab:blue')
+    #plot_data_00 = ax.plot(data.DateTime, data.HR, alpha=1, color='tab:blue')
     plot_data_01 = ax.plot(data.DateTime, data.rh_inst, alpha=.5, color='tab:orange')
-    plot_data_02 = ax.plot(data10min.DateTime, data10min.HR, alpha=1, color='blue', linewidth=2)
+    #plot_data_02 = ax.plot(data10min.DateTime, data10min.HR, alpha=1, color='blue', linewidth=2)
     plot_data_03 = ax.plot(data10min.DateTime, data10min.rh_inst, alpha=1, color='orange', linewidth=2)
     HR_patch = mpatches.Patch(color='blue', label='Humedad Siap')
     HR_patch_2 = mpatches.Patch(color='orange', label='Humedad aws810')
@@ -185,7 +185,8 @@ def axHR(ax, data):
     ax.tick_params(direction='in', labelsize=6, length=20)
     ax.tick_params('x', labelrotation=45)
     #plt.show()
-    return [plot_data_00, plot_data_01, plot_data_02, plot_data_03]
+    #return [plot_data_00, plot_data_01, plot_data_02, plot_data_03]
+    return [ plot_data_01, plot_data_03]
 
 def axPPmm(ax):
     #fig, ax = plt.subplots()
@@ -212,9 +213,9 @@ def axVRap(ax, data):
     data10min = data.resample('30T', label='right').mean()
     data10min['DateTime'] = data10min.index
 
-    plot_data_00 = ax.plot(data.DateTime, data.ViMS, alpha=1, color='tab:blue')
+    #plot_data_00 = ax.plot(data.DateTime, data.ViMS, alpha=1, color='tab:blue')
     plot_data_01 = ax.plot(data.DateTime, data.ws_inst_spd, alpha=.5, color='tab:orange',)
-    plot_data_02 = ax.plot(data10min.DateTime, data10min.ViMS, alpha=1, color='blue', linewidth=2)
+    #plot_data_02 = ax.plot(data10min.DateTime, data10min.ViMS, alpha=1, color='blue', linewidth=2)
     plot_data_03 = ax.plot(data10min.DateTime, data10min.ws_inst_spd, alpha=1, color='orange', linewidth=2)
     Rap_patch = mpatches.Patch(color='blue', label='Intensidad Siap')
     Rap_patch_2 = mpatches.Patch(color='orange', label='Intensidad aws810')
@@ -230,7 +231,8 @@ def axVRap(ax, data):
     ax.xaxis.set_major_formatter(date_form)
     ax.tick_params(direction='in', labelsize=6, length=20)
     ax.tick_params('x', labelrotation=45)
-    return [plot_data_00, plot_data_01, plot_data_02, plot_data_03]
+    #return [plot_data_00, plot_data_01, plot_data_02, plot_data_03]
+    return [ plot_data_01, plot_data_03]
 
 def calVientoDirProm(data):
     data = data.copy()
@@ -245,7 +247,8 @@ def calVientoDirProm(data):
     return data10min[[data.columns[0]]]
 
 def axVGra(ax, data):
-    data10min = pd.concat([calVientoDirProm(data[['Dir']]), calVientoDirProm(data[['wd_inst_dir']])], axis=1)
+    #data10min = pd.concat([calVientoDirProm(data[['Dir']]), calVientoDirProm(data[['wd_inst_dir']])], axis=1)
+    data10min = calVientoDirProm(data[['wd_inst_dir']])
 
     data10min['DateTime'] = data10min.index
     #data['sinDir'] = np.sin(np.deg2rad(data.Dir))
@@ -259,9 +262,9 @@ def axVGra(ax, data):
 
 
 
-    plot_data_00 = ax.plot(data.DateTime, data.Dir, alpha=.3, marker='.', color='tab:blue', linestyle='')
+    #plot_data_00 = ax.plot(data.DateTime, data.Dir, alpha=.3, marker='.', color='tab:blue', linestyle='')
     plot_data_01 = ax.plot(data.DateTime, data.wd_inst_dir, alpha=.1, marker='.', color='tab:orange', linestyle='')
-    plot_data_02 = ax.plot(data10min.DateTime, data10min.Dir, alpha=1, marker='.', color='blue', linewidth=.75)
+    #plot_data_02 = ax.plot(data10min.DateTime, data10min.Dir, alpha=1, marker='.', color='blue', linewidth=.75)
     plot_data_03 = ax.plot(data10min.DateTime, data10min.wd_inst_dir, alpha=1, marker='.', color='orange', linewidth=.75)
 
     Dir_patch = mpatches.Patch(color='blue', label='Direccion Siap')
@@ -280,15 +283,16 @@ def axVGra(ax, data):
     ax.yaxis.set_ticks(np.arange(0, 390, 30))
     ax.tick_params(direction='in', labelsize=6, length=20)
     ax.tick_params('x', labelrotation=45)
-    return [plot_data_00, plot_data_01, plot_data_02, plot_data_03]
+    #return [plot_data_00, plot_data_01, plot_data_02, plot_data_03]
+    return [ plot_data_01, plot_data_03]
 
 def axRad(ax, data):
 
     data10min = data.resample('30T', label='right').mean()
     data10min['DateTime'] = data10min.index
-    plot_data_00 = ax.plot(data.DateTime, data.RadWm2, alpha=1)
+    #plot_data_00 = ax.plot(data.DateTime, data.RadWm2, alpha=1)
     plot_data_01 = ax.plot(data.DateTime, data.solar_rad_inst, alpha=1, color='tab:orange')
-    plot_data_02 = ax.plot(data10min.DateTime, data10min.RadWm2, alpha=1, color='blue', linewidth=3)
+    #plot_data_02 = ax.plot(data10min.DateTime, data10min.RadWm2, alpha=1, color='blue', linewidth=3)
     plot_data_03 = ax.plot(data10min.DateTime, data10min.solar_rad_inst, alpha=1, color='orange', linewidth=3)
 
     Rad_patch = mpatches.Patch(color='blue', label='Radiacion Wm2')
@@ -308,14 +312,15 @@ def axRad(ax, data):
     ax.xaxis.set_major_formatter(date_form)
     ax.tick_params(direction='in', labelsize=6, length=20)
     ax.tick_params('x', labelrotation=45)
-    return [plot_data_00, plot_data_01, plot_data_02, plot_data_03]
+    #return [plot_data_00, plot_data_01, plot_data_02, plot_data_03
+    return [plot_data_01, plot_data_03]
 
 def axPres(ax, data):
     data10min = data.resample('30T', label='right').mean()
     data10min['DateTime'] = data10min.index
-    plot_data_00 = ax.plot(data.DateTime, data.Pres, alpha=1, color='tab:blue')
+    #plot_data_00 = ax.plot(data.DateTime, data.Pres, alpha=1, color='tab:blue')
     plot_data_01 = ax.plot(data.DateTime, data.pa_inst, alpha=1, color='tab:orange')
-    plot_data_02 = ax.plot(data10min.DateTime, data10min.Pres, alpha=1, color='blue', linewidth=2)
+    #plot_data_02 = ax.plot(data10min.DateTime, data10min.Pres, alpha=1, color='blue', linewidth=2)
     plot_data_03 = ax.plot(data10min.DateTime, data10min.pa_inst, alpha=1, color='orange', linewidth=2)
 
     Pres_patch = mpatches.Patch(color='blue', label='Presion Siap')
@@ -331,16 +336,17 @@ def axPres(ax, data):
     ax.xaxis.set_major_formatter(date_form)
     ax.tick_params(direction='in', labelsize=6, length=20)
     ax.tick_params('x', labelrotation=45)
-    return [plot_data_00, plot_data_01, plot_data_02, plot_data_03]
+    #return [plot_data_00, plot_data_01, plot_data_02, plot_data_03]
+    return [ plot_data_01, plot_data_03]
 
 def axTemp(ax, data):
 
     data10min = data.resample('30T', label='right').mean()
     data10min['DateTime'] = data10min.index
-    plot_data_00 = ax.plot(data.DateTime, data.TempA, alpha=0.6, linewidth=2, color='tab:blue')
-    plot_data_04 = ax.plot(data.DateTime, data.TsueC, alpha=0.6, linewidth=2, color='tab:green')
+    #plot_data_00 = ax.plot(data.DateTime, data.TempA, alpha=0.6, linewidth=2, color='tab:blue')
+    #plot_data_04 = ax.plot(data.DateTime, data.TsueC, alpha=0.6, linewidth=2, color='tab:green')
     plot_data_01 = ax.plot(data.DateTime, data.ta_inst, alpha=0.6, linewidth=2, color='tab:orange')
-    plot_data_02 = ax.plot(data10min.DateTime, data10min.TempA, alpha=1, color='blue', linewidth=2)
+    #plot_data_02 = ax.plot(data10min.DateTime, data10min.TempA, alpha=1, color='blue', linewidth=2)
     plot_data_03 = ax.plot(data10min.DateTime, data10min.ta_inst, alpha=1, color='orange', linewidth=2)
     tempA_patch = mpatches.Patch(color='blue', label='Temp Aire Siap')
     tempA_patch_2 = mpatches.Patch(color='orange', label='Temp Aire aws810')
@@ -356,7 +362,8 @@ def axTemp(ax, data):
     ax.xaxis.set_major_formatter(date_form)
     ax.tick_params(direction='in', labelsize=6, length=20)
     ax.tick_params('x', labelrotation=45)
-    return [plot_data_00, plot_data_01, plot_data_02,plot_data_03, plot_data_04]
+    return [ plot_data_01, plot_data_03]
+    #return [plot_data_00, plot_data_01, plot_data_02,plot_data_03, plot_data_04]
 
 def axViento(ax):
 

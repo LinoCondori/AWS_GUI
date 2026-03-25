@@ -1,4 +1,4 @@
-import graficador_v11 as gf
+import graficador_v12 as gf
 import BaseDeDatos_Lib_v04 as bd
 import pandas as pd
 import os
@@ -156,13 +156,13 @@ class Status_AWS(wx.Panel):
         PrimeraColumna = wx.BoxSizer(wx.VERTICAL)
         SegundaColumna = wx.BoxSizer(wx.VERTICAL)
 
-        dataNotNa = data.dropna()
-        self.FechaHora = MagMedidaUnidad(self, 'Fecha y Hora: ',dataNotNa.DateTime.tail(1)[0]._date_repr, '\n '+dataNotNa.DateTime.tail(1)[0]._time_repr[:8])
-        self.Temperatura = MagMedidaUnidad(self, 'Temperatura: ',  f'{dataNotNa.TempA.tail(1)[0]:.1f}', ' °C')
-        self.Presion = MagMedidaUnidad(self, 'Presion: ', f'{dataNotNa.Pres.tail(1)[0]:.1f}', ' hPa')
-        self.Humedad = MagMedidaUnidad(self, 'Humedad: ', f'{dataNotNa.HR.tail(1)[0]:.1f}', ' %')
-        self.Rapidez = MagMedidaUnidad(self, 'Intensidad: ', f'{dataNotNa.ViMS.tail(1)[0]:.1f}', ' m/s')
-        self.Direccion = MagMedidaUnidad(self, 'Direccion: ', f'{dataNotNa.Dir.tail(1)[0]:.1f}', ' Grad')
+        dataNotNa = data.dropna(axis=1, how='all')
+        self.FechaHora = MagMedidaUnidad(self, 'Fecha y Hora: ',dataNotNa.tail(1).index[0]._date_repr, '\n '+dataNotNa.tail(1).index[0]._time_repr[:8])
+        self.Temperatura = MagMedidaUnidad(self, 'Temperatura: ',  f'{dataNotNa.ta_avg.tail(1)[0]:.1f}', ' °C')
+        self.Presion = MagMedidaUnidad(self, 'Presion: ', f'{dataNotNa.pa_avg.tail(1)[0]:.1f}', ' hPa')
+        self.Humedad = MagMedidaUnidad(self, 'Humedad: ', f'{dataNotNa.rh_avg.tail(1)[0]:.1f}', ' %')
+        self.Rapidez = MagMedidaUnidad(self, 'Intensidad: ', f'{dataNotNa.ws_avg1.tail(1)[0]:.1f}', ' m/s')
+        self.Direccion = MagMedidaUnidad(self, 'Direccion: ', f'{dataNotNa.wd_avg1.tail(1)[0]:.1f}', ' Grad')
 
         test.Add(self.FechaHora, 0, wx.ALL, 5)
         PrimeraColumna.Add(self.Temperatura, 0, wx.ALL, 5)
@@ -202,6 +202,7 @@ class StatusBox(wx.Panel):
 
 
 def buscarEnBaseDeDatos(inicio, fin, ext = '.csv' ):
+    """
     try:
         df_siap = bd.buscarEnBaseDeDatos(engine, "SIAP", inicio, fin)
         df_siap.DateTime = pd.to_datetime(df_siap.DateTime)
@@ -212,18 +213,18 @@ def buscarEnBaseDeDatos(inicio, fin, ext = '.csv' ):
         #Ubic, TempA, HR, Pres, ViMS, Dir, RadWm2, PPmm, TsueC, DateTime
         print("No se pudo Obtener Datos de " + inicio._repr_base)
         df_siap = pd.DataFrame()
-
+    """
     try:
         df_aw810 = bd.buscarEnBaseDeDatos(engine, "aws810", inicio, fin)
         df_aw810.DateTime = pd.to_datetime(df_aw810.DateTime)
         df_aw810.set_index(['DateTime'], inplace=True)
         df_aw810.dropna(axis='columns', how='all', inplace=True)
-        #df_aw810['DateTime'] = df_aw810.index
+        df_aw810['DateTime'] = df_aw810.index
     except:
         print("No se pudo Obtener Datos de " + inicio._repr_base)
         df_aw810 = pd.DataFrame()
-    df_aux = pd.concat([df_siap, df_aw810], axis=1)
-    return pd.concat([df_siap,df_aw810], axis=1)
+    #df_aux = pd.concat([df_siap, df_aw810], axis=1)
+    return df_aw810
 
 class VentanaPrincipal ( wx.Frame ):
 
@@ -260,7 +261,8 @@ class VentanaPrincipal ( wx.Frame ):
 
 
         self.data = df
-        if df.empty: #Funcion que solo da Valores para completar.
+
+        """if df.empty: #Funcion que solo da Valores para completar.
             X = 1440
             Example = pd.DataFrame()
             Example['DateTime'] = pd.date_range(end=pd.Timestamp('today'), freq='T', periods=X)
@@ -277,7 +279,7 @@ class VentanaPrincipal ( wx.Frame ):
             Example['RadWm2'] = Y
             Example['Pres'] = Y
             Example.set_index('DateTime', drop=False, inplace=True)
-            self.data = Example
+            self.data = Example"""
 
 
 
@@ -409,47 +411,64 @@ class VentanaPrincipal ( wx.Frame ):
         dataTmin = self.data.resample('30T', label='right').mean().copy()
         dataTmin['DateTime'] = dataTmin.index
 
-        dataTminWind = pd.concat([gf.calVientoDirProm(self.data[['Dir']]),
-                                  gf.calVientoDirProm(self.data[['wd_inst_dir']])], axis=1)
+        #dataTminWind = pd.concat([gf.calVientoDirProm(self.data[['Dir']]),
+        #                          gf.calVientoDirProm(self.data[['wd_avg1']])], axis=1)
+        dataTminWind = gf.calVientoDirProm(self.data[['wd_avg1']])
+
         dataTminWind['DateTime'] = dataTminWind.index
         
         
         #TEMPERATURA
         self.ActualizarEjeX(self.axes_Temp)
-        self.ActualizarEjeY(self.axes_Temp, self.data.TempA)
+        self.ActualizarEjeY(self.axes_Temp, self.data.ta_inst)
 
-        self.ActualizarPlot(self.plot_Temp[0][0], self.data, 'TempA')
-        self.ActualizarPlot(self.plot_Temp[1][0], self.data, 'ta_inst')
-        self.ActualizarPlot(self.plot_Temp[2][0], dataTmin, 'TempA')
-        self.ActualizarPlot(self.plot_Temp[3][0], dataTmin, 'ta_inst')
-        self.ActualizarPlot(self.plot_Temp[4][0], self.data, 'TsueC')
+        self.ActualizarPlot(self.plot_Temp[0][0], self.data, 'ta_inst')
+        self.ActualizarPlot(self.plot_Temp[1][0], dataTmin, 'ta_inst')
+
+        #self.ActualizarPlot(self.plot_Temp[0][0], self.data, 'TempA')
+        # self.ActualizarPlot(self.plot_Temp[1][0], self.data, 'ta_inst')
+        #self.ActualizarPlot(self.plot_Temp[2][0], dataTmin, 'TempA')
+        # self.ActualizarPlot(self.plot_Temp[3][0], dataTmin, 'ta_inst')
+        #self.ActualizarPlot(self.plot_Temp[4][0], self.data, 'TsueC')
 
         #HUMEDAD
         self.ActualizarEjeX(self.axes_Humd)
-        self.ActualizarPlot(self.plot_Humd[0][0], self.data, 'HR')
-        self.ActualizarPlot(self.plot_Humd[1][0], self.data, 'rh_inst')
-        self.ActualizarPlot(self.plot_Humd[2][0], dataTmin, 'HR')
-        self.ActualizarPlot(self.plot_Humd[3][0], dataTmin, 'rh_inst')
+
+        self.ActualizarPlot(self.plot_Humd[0][0], self.data, 'rh_inst')
+        self.ActualizarPlot(self.plot_Humd[1][0], dataTmin, 'rh_inst')
+
+        #self.ActualizarPlot(self.plot_Humd[0][0], self.data, 'HR')
+        #self.ActualizarPlot(self.plot_Humd[1][0], self.data, 'rh_inst')
+        #self.ActualizarPlot(self.plot_Humd[2][0], dataTmin, 'HR')
+        #self.ActualizarPlot(self.plot_Humd[3][0], dataTmin, 'rh_inst')
 
 
         # PRESION
         self.ActualizarEjeX(self.axes_Pres)
-        self.ActualizarEjeY(self.axes_Pres, self.data.Pres)
+        self.ActualizarEjeY(self.axes_Pres, self.data.pa_inst)
 
-        self.ActualizarPlot(self.plot_Pres[0][0], self.data, 'Pres')
-        self.ActualizarPlot(self.plot_Pres[1][0], self.data, 'pa_inst')
-        self.ActualizarPlot(self.plot_Pres[2][0], dataTmin, 'Pres')
-        self.ActualizarPlot(self.plot_Pres[3][0], dataTmin, 'pa_inst')
+        self.ActualizarPlot(self.plot_Pres[0][0], self.data, 'pa_inst')
+        self.ActualizarPlot(self.plot_Pres[1][0], dataTmin, 'pa_inst')
+
+
+        #self.ActualizarPlot(self.plot_Pres[0][0], self.data, 'Pres')
+        #self.ActualizarPlot(self.plot_Pres[1][0], self.data, 'pa_inst')
+        #self.ActualizarPlot(self.plot_Pres[2][0], dataTmin, 'Pres')
+        #self.ActualizarPlot(self.plot_Pres[3][0], dataTmin, 'pa_inst')
 
 
         # VIENTO RAPIDEZ
         self.ActualizarEjeX(self.axes_VRap)
-        self.ActualizarEjeY(self.axes_VRap, self.data.ViMS)
+        self.ActualizarEjeY(self.axes_VRap, self.data.ws_avg1)
 
-        self.ActualizarPlot(self.plot_VRap[0][0], self.data, 'ViMS')
-        self.ActualizarPlot(self.plot_VRap[1][0], self.data, 'ws_inst_spd')
-        self.ActualizarPlot(self.plot_VRap[2][0], dataTmin, 'ViMS')
-        self.ActualizarPlot(self.plot_VRap[3][0], dataTmin, 'ws_inst_spd')
+        self.ActualizarPlot(self.plot_VRap[0][0], self.data, 'ws_avg1')
+        self.ActualizarPlot(self.plot_VRap[1][0], dataTmin, 'ws_avg1')
+
+
+        #self.ActualizarPlot(self.plot_VRap[0][0], self.data, 'ViMS')
+        #self.ActualizarPlot(self.plot_VRap[1][0], self.data, 'ws_avg1')
+        #self.ActualizarPlot(self.plot_VRap[2][0], dataTmin, 'ViMS')
+        #self.ActualizarPlot(self.plot_VRap[3][0], dataTmin, 'ws_avg1')
 
 
         # Viento Direccion
@@ -457,10 +476,14 @@ class VentanaPrincipal ( wx.Frame ):
 
         self.ActualizarEjeX(self.axes_VGra)
 
-        self.ActualizarPlot(self.plot_VGra[0][0], self.data, 'Dir')
-        self.ActualizarPlot(self.plot_VGra[1][0], self.data, 'wd_inst_dir')
-        self.ActualizarPlot(self.plot_VGra[2][0], dataTminWind, 'Dir')
-        self.ActualizarPlot(self.plot_VGra[3][0], dataTminWind, 'wd_inst_dir')
+        self.ActualizarPlot(self.plot_VGra[0][0], self.data, 'wd_avg1')
+        self.ActualizarPlot(self.plot_VGra[1][0], dataTminWind, 'wd_avg1')
+
+
+        #self.ActualizarPlot(self.plot_VGra[0][0], self.data, 'Dir')
+        #self.ActualizarPlot(self.plot_VGra[1][0], self.data, 'wd_avg1')
+        #self.ActualizarPlot(self.plot_VGra[2][0], dataTminWind, 'Dir')
+        #self.ActualizarPlot(self.plot_VGra[3][0], dataTminWind, 'wd_avg1')
 
 
 
@@ -468,25 +491,35 @@ class VentanaPrincipal ( wx.Frame ):
         self.ActualizarEjeX(self.axes_Rad)
         self.ActualizarEjeY(self.axes_Rad, self.data.solar_rad_inst)
 
-        self.ActualizarPlot(self.plot_Rad[0][0], self.data, 'RadWm2')
-        self.ActualizarPlot(self.plot_Rad[1][0], self.data, 'solar_rad_inst')
+        self.ActualizarPlot(self.plot_Rad[0][0], self.data, 'solar_rad_inst')
+        self.ActualizarPlot(self.plot_Rad[1][0], dataTmin, 'solar_rad_inst')
 
-        self.ActualizarPlot(self.plot_Rad[2][0], dataTmin, 'RadWm2')
-        self.ActualizarPlot(self.plot_Rad[3][0], dataTmin, 'solar_rad_inst')
+
+
+        #self.ActualizarPlot(self.plot_Rad[0][0], self.data, 'RadWm2')
+        #self.ActualizarPlot(self.plot_Rad[1][0], self.data, 'solar_rad_inst')
+        #self.ActualizarPlot(self.plot_Rad[2][0], dataTmin, 'RadWm2')
+        #self.ActualizarPlot(self.plot_Rad[3][0], dataTmin, 'solar_rad_inst')
 
         self.canvas.draw()
 
     def ActualizarStatus(self):
         #self.Status.FechaHora.
         #Fecha y Hora
-        dataNotNa = self.data.dropna()
-        print(dataNotNa.DateTime.tail(1)[0])
-        self.Status.FechaHora.m_staticText5.SetLabel(dataNotNa.DateTime.tail(1)[0]._date_repr)
-        self.Status.FechaHora.m_staticText6.SetLabel(' '+dataNotNa.DateTime.tail(1)[0]._time_repr[:8])
+
+        dataNotNa = self.data.dropna(axis=1)
+        self.Status.FechaHora.m_staticText5.SetLabel(dataNotNa.tail(1).index[0]._date_repr)
+        self.Status.FechaHora.m_staticText6.SetLabel(' '+dataNotNa.tail(1).index[0]._time_repr[:8])
         #Temperatura
-        self.Status.Temperatura.m_staticText5.SetLabel( f'{dataNotNa.TempA.tail(1)[0]:.1f}')
+        self.Status.Temperatura.m_staticText5.SetLabel( f'{dataNotNa.ta_avg.tail(1)[0]:.1f}')
         #Presion
-        self.Status.Presion.m_staticText5.SetLabel( f'{dataNotNa.Pres.tail(1)[0]:.1f}')
+        self.Status.Presion.m_staticText5.SetLabel( f'{dataNotNa.pa_avg.tail(1)[0]:.1f}')
+        # Humedad
+        self.Status.Humedad.m_staticText5.SetLabel(f'{dataNotNa.rh_avg.tail(1)[0]:.1f}')
+        # Intensidad
+        self.Status.Rapidez.m_staticText5.SetLabel(f'{dataNotNa.ws_avg1.tail(1)[0]:.1f}')
+        # Direccion
+        self.Status.Direccion.m_staticText5.SetLabel(f'{dataNotNa.wd_avg1.tail(1)[0]:.1f}')
 
     def estructuraPrincipal(self):
         self.panel = wx.Panel(self)
@@ -519,7 +552,7 @@ class VentanaPrincipal ( wx.Frame ):
         #print("CHAU")
         #self.SerialCal.close()
         self.Destroy()  # This will close the app window.
-
+        wx.GetApp().ExitMainLoop()
 
     def __del__( self ):
 
