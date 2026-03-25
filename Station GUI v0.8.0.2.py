@@ -156,13 +156,13 @@ class Status_AWS(wx.Panel):
         PrimeraColumna = wx.BoxSizer(wx.VERTICAL)
         SegundaColumna = wx.BoxSizer(wx.VERTICAL)
 
-        dataNotNa = data.dropna(axis=1, how='all')
-        self.FechaHora = MagMedidaUnidad(self, 'Fecha y Hora: ',dataNotNa.tail(1).index[0]._date_repr, '\n '+dataNotNa.tail(1).index[0]._time_repr[:8])
-        self.Temperatura = MagMedidaUnidad(self, 'Temperatura: ',  f'{dataNotNa.ta_avg.tail(1)[0]:.1f}', ' °C')
-        self.Presion = MagMedidaUnidad(self, 'Presion: ', f'{dataNotNa.pa_avg.tail(1)[0]:.1f}', ' hPa')
-        self.Humedad = MagMedidaUnidad(self, 'Humedad: ', f'{dataNotNa.rh_avg.tail(1)[0]:.1f}', ' %')
-        self.Rapidez = MagMedidaUnidad(self, 'Intensidad: ', f'{dataNotNa.ws_avg1.tail(1)[0]:.1f}', ' m/s')
-        self.Direccion = MagMedidaUnidad(self, 'Direccion: ', f'{dataNotNa.wd_avg1.tail(1)[0]:.1f}', ' Grad')
+        dataNotNa = data.dropna(axis=1, how='all').tail(1)
+        self.FechaHora = MagMedidaUnidad(self, 'Fecha y Hora: ',dataNotNa.index[0]._date_repr, '\n '+dataNotNa.index[0]._time_repr[:8])
+        self.Temperatura = MagMedidaUnidad(self, 'Temperatura: ',  f'{dataNotNa.ta_avg[0]:.1f}', ' °C')
+        self.Presion = MagMedidaUnidad(self, 'Presion: ', f'{dataNotNa.pa_avg[0]:.1f}', ' hPa')
+        self.Humedad = MagMedidaUnidad(self, 'Humedad: ', f'{dataNotNa.rh_avg[0]:.1f}', ' %')
+        self.Rapidez = MagMedidaUnidad(self, 'Intensidad: ', f'{dataNotNa.ws_avg1[0]:.1f}', ' m/s')
+        self.Direccion = MagMedidaUnidad(self, 'Direccion: ', f'{dataNotNa.wd_avg1[0]:.1f}', ' Grad')
 
         test.Add(self.FechaHora, 0, wx.ALL, 5)
         PrimeraColumna.Add(self.Temperatura, 0, wx.ALL, 5)
@@ -507,19 +507,19 @@ class VentanaPrincipal ( wx.Frame ):
         #self.Status.FechaHora.
         #Fecha y Hora
 
-        dataNotNa = self.data.dropna(axis=1)
-        self.Status.FechaHora.m_staticText5.SetLabel(dataNotNa.tail(1).index[0]._date_repr)
-        self.Status.FechaHora.m_staticText6.SetLabel(' '+dataNotNa.tail(1).index[0]._time_repr[:8])
+        dataNotNa = self.data.dropna(axis=1, how='all').tail(1)
+        self.Status.FechaHora.m_staticText5.SetLabel(dataNotNa.index[0]._date_repr)
+        self.Status.FechaHora.m_staticText6.SetLabel(' '+dataNotNa.index[0]._time_repr[:8])
         #Temperatura
-        self.Status.Temperatura.m_staticText5.SetLabel( f'{dataNotNa.ta_avg.tail(1)[0]:.1f}')
+        self.Status.Temperatura.m_staticText5.SetLabel( f'{dataNotNa.ta_avg[0]:.1f}')
         #Presion
-        self.Status.Presion.m_staticText5.SetLabel( f'{dataNotNa.pa_avg.tail(1)[0]:.1f}')
+        self.Status.Presion.m_staticText5.SetLabel( f'{dataNotNa.pa_avg[0]:.1f}')
         # Humedad
-        self.Status.Humedad.m_staticText5.SetLabel(f'{dataNotNa.rh_avg.tail(1)[0]:.1f}')
+        self.Status.Humedad.m_staticText5.SetLabel(f'{dataNotNa.rh_avg[0]:.1f}')
         # Intensidad
-        self.Status.Rapidez.m_staticText5.SetLabel(f'{dataNotNa.ws_avg1.tail(1)[0]:.1f}')
+        self.Status.Rapidez.m_staticText5.SetLabel(f'{dataNotNa.ws_avg1[0]:.1f}')
         # Direccion
-        self.Status.Direccion.m_staticText5.SetLabel(f'{dataNotNa.wd_avg1.tail(1)[0]:.1f}')
+        self.Status.Direccion.m_staticText5.SetLabel(f'{dataNotNa.wd_avg1[0]:.1f}')
 
     def estructuraPrincipal(self):
         self.panel = wx.Panel(self)
